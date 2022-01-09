@@ -69,6 +69,7 @@ jump_max = pos_y - jump_max_distance #Altura maxima relativa
 ### Dibijo de la primera Plataforma
 on_plataform = False
 aux_plataform = False
+#Existe un desfase entre la posicion ed la imagen y el lugar en el codigo
 plat_pos_x = (358, 505) #Posicion en eje x de la plataforma
 plat_pos_y = 340  #posision en eje Y de la plataforma
 
