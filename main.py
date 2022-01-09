@@ -19,7 +19,7 @@ def next(pos):
         return 1
 #Saber si el personake se encuentra dentro de de los limites de una plataforma
 def in_plataform (x,y,pos_x, pos_y):
-    if pos_x > x[0] and pos_x < x[1] and pos_y <= y:
+    if pos_x > x[0] and pos_x < x[1] and pos_y <= y and pos_y >= y - 5:
         return True
 
     
@@ -64,11 +64,13 @@ jump_aux = pos_y #lugar donde inicio el salto
 jump_max_distance = 70 #altura maxima del salto
 suma = 0 #variable de control para edicion
 image_dir = 'f1'#imagen inicial del personaje
+jump_max = pos_y - jump_max_distance #Altura maxima relativa
 
 ### Dibijo de la primera Plataforma
 on_plataform = False
-plat_pos_x = (400, 550) #Posicion en eje x de la plataforma
-plat_pos_y = 345    #posision en eje Y de la plataforma
+aux_plataform = False
+plat_pos_x = (358, 505) #Posicion en eje x de la plataforma
+plat_pos_y = 340  #posision en eje Y de la plataforma
 
 plataform = pygame.transform.scale(pygame.image.load('textures/plataforma.png'),(150,100)) #redimensionar el png de la plataforma
 
@@ -179,35 +181,37 @@ while True:
         #right = False
     
     ### Activar Salto
+    #si se oprime la tecla del salto y no esta saltando previamente
     if jump and not is_jumping:
         is_jumping = True
         jump_aux = pos_y
         going_up = True
         jump_max = pos_y - jump_max_distance
         jump = False
+        aux_plataform = False
     
     ### Funcionn del salto
     if is_jumping :
         
         #condicion de subida
         if pos_y <= jump_aux and pos_y > jump_max and going_up:
-            print('subiendo')
+            #print('subiendo')
             pos_y -= paso_jump
 
         #condicion del punto mas alto
         elif pos_y <= jump_max and going_up:
-            print('arriba')
+            #print('arriba')
             going_up = False
             pos_y += paso_jump
 
         #Condicion de bajada
         elif pos_y < jump_aux and pos_y > jump_max and not going_up and not on_plataform:
-            print('bajando')
+            #print('bajando')
             pos_y += paso_jump
 
         #Condicion de llegada a piso
-        elif pos_y >= jump_aux and not going_up :
-            print('abajo')
+        elif pos_y >= jump_aux and not going_up:
+            #print('abajo')
             pos_y = jump_aux
             is_jumping = False
             jump = False
@@ -215,13 +219,34 @@ while True:
     #Saber si el personaje esta en una plataforma
     on_plataform = in_plataform(plat_pos_x,plat_pos_y,pos_x,pos_y)
     if on_plataform:
-        suma += 1
-        jump_aux = plat_pos_y
-        print('estoy aqui'+str(suma))
+        suma += 1        
+        #   print('estoy aqui'+str(suma))
+        if not aux_plataform and not going_up:
+            #print('llegue')
+            jump_aux = plat_pos_y
+            is_jumping =False
+            jump = False
+            pos_y = plat_pos_y
+            aux_plataform = True
         #going_up = False
-    else:
+    elif not on_plataform:
         jump_aux = 395
         suma = 0
+        if aux_plataform:
+            jump =False
+            is_jumping = False
+            going_up = False
+            if pos_y < jump_aux and pos_y > jump_max and not going_up and not on_plataform:
+                #print('bajando2')
+                pos_y += paso_jump
+
+        #Condicion de llegada a piso
+            elif pos_y >= jump_aux and not going_up :
+                #print('abajo2')
+                pos_y = jump_aux
+                is_jumping = False
+                jump = False
+                aux_plataform = False   
         
     ### ---- ZONA DE DIBUJO    
    
