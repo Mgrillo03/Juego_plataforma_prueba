@@ -101,16 +101,13 @@ while True:
 
         keys = pygame.key.get_pressed()
        
-        '''
-        lectura de movimientos en eje Y deshabilitados
+        
+#lectura de movimientos en eje Y deshabilitados
         if keys[K_UP] :
-            #Por ahora deshabilitado
-            up = True
-        else :
-            up = False
-        '''
+            
+            jump = True
         if keys[K_DOWN]:
-            #Por ahora deshabilitado
+            
             down = True
         else: 
             down = False
@@ -123,12 +120,10 @@ while True:
             right = True
         else:
             right = False
-        if keys[K_b]:
+        if keys[K_SPACE]:
             speed = True
         else:
             speed = False
-        if keys [K_SPACE]:
-            jump = True
 
     ## GRID
     # RENDER GAME GRID
@@ -139,11 +134,11 @@ while True:
     for i in plataforms:
         screen.blit(plataform,(i[0]+33,i[2]+10))
 
-    ### Calculo de movimiento
+### Calculo de movimiento
+    
+    #Efecto de profundidad, eliminado momentaneamente 
+
     ''''
-    Efecto de profundidad, eliminado momentaneamente 
-
-
     if up and pos_y > limit_y and not jump and not is_jumping:
         pos_y -= paso
         image_dir = 'b'+str(walk)
@@ -152,6 +147,7 @@ while True:
         cont = true_false(cont)
         #up = False
     '''
+    
     if down  and not jump and not is_jumping: 
         #pos_y += paso
         image_dir = 'f0'
@@ -161,7 +157,7 @@ while True:
         #down = False
         
    
-   #Moviientos laterales
+#Moviientos laterales
     if left and pos_x > 2:
         #sprint del personaje
         if speed:
