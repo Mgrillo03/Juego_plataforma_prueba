@@ -55,7 +55,7 @@ cont    = False
 #Velocidad del personaje
 paso    = 1.5
 #Velocidad del salto
-paso_jump = 4
+paso_jump = 2.5
 #inicializacion de movimientos
 up      = False
 down    = False
@@ -82,7 +82,7 @@ on_plataform = False
 aux_plataform = False
 #Existe un desfase entre la posicion ed la imagen y el lugar en el codigo
 #Lista de plataformas
-plataforms = [(192,335,340),(367,510,340)]
+plataforms = [(192,335,340),(367,510,340),(400,543,275),(327,470,210),(530,675,210)]
 #print(plataforms)
 plat_pos = plataforms[0] #Posicion en eje x & y de la plataforma
 #print(plat_pos)
@@ -165,7 +165,7 @@ while True:
     if left and pos_x > 2:
         #sprint del personaje
         if speed:
-            pos_x -= paso*4
+            pos_x -= paso*2
         else:
             pos_x -= paso
         #cargar siguiente sprite
@@ -181,7 +181,7 @@ while True:
     if right and pos_x < 790:
         #sprint del personaje
         if speed:
-            pos_x += paso*4
+            pos_x += paso*2
         else:
             pos_x += paso
         #cargar siguiente sprite
@@ -195,7 +195,7 @@ while True:
             image_dir = 'r2'
         #right = False
     
-    ### Activar Salto
+   ### SALTO
     #si se oprime la tecla del salto y no esta saltando previamente
     if jump and not is_jumping:
         is_jumping = True
@@ -204,6 +204,7 @@ while True:
         jump_max = pos_y - jump_max_distance
         jump = False
         aux_plataform = False
+        
     
     ### Funcionn del salto
     if is_jumping :
@@ -223,15 +224,18 @@ while True:
         elif pos_y < jump_aux and pos_y > jump_max and not going_up and not on_plataform:
             #print('bajando')
             pos_y += paso_jump
-
+            
         #Condicion de llegada a piso
         elif pos_y >= jump_aux and not going_up:
             #print('abajo')
             pos_y = jump_aux
             is_jumping = False
             jump = False
+            
+
+
         
-    #Saber si el personaje esta en una plataforma
+  #Saber si el personaje esta en una plataforma
     on_plataform, plat_index = in_plataform(plataforms,pos_x,pos_y)
     plat_pos = plataforms[plat_index]
     if on_plataform:
@@ -256,7 +260,7 @@ while True:
             if pos_y < jump_aux and pos_y > jump_max and not going_up and not on_plataform:
                 #print('bajando2')
                 pos_y += paso_jump
-
+            
         #Condicion de llegada a piso
             elif pos_y >= jump_aux and not going_up :
                 #print('abajo2')
@@ -264,8 +268,8 @@ while True:
                 is_jumping = False
                 jump = False
                 aux_plataform = False   
-        
-    ### ---- ZONA DE DIBUJO    
+                
+  ### ---- ZONA DE DIBUJO    
    
     #Cargar imagen del personaje
     image = pygame.image.load(r'.\sprites\link\link_'+image_dir+'.png')
@@ -280,5 +284,5 @@ while True:
 
     ### ---- ZONA DE DIBUJO
 
-    #Actualizar Pantalla
+  #Actualizar Pantalla
     pygame.display.flip()
