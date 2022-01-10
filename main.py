@@ -18,9 +18,20 @@ def next(pos):
     else:
         return 1
 #Saber si el personake se encuentra dentro de de los limites de una plataforma
-def in_plataform (x,y,pos_x, pos_y):
-    if pos_x > x[0] and pos_x < x[1] and pos_y <= y and pos_y >= y - 5:
-        return True
+def in_plataform (plataforms,pos_x, pos_y):
+    '''
+    Funcion Para determinar si el personaje esta sobre una plataforma
+    recibe una lista con las posiciones de cada plataforma en pantalla
+    recibe la posicion del personaje y regresa un Bool y una tupla con el resultado
+    plataformas : lista de tuplas con las coordenadas de cada plataforma
+    pos_x y pos_y es la posicion del personaje
+    '''
+    for i in plataforms:
+ 
+        if pos_x > i[0] and pos_x < i[1] and pos_y <= i[2] and pos_y >= i[2] - 5:
+            return True, plataforms.index(i)
+        
+    return False, plataforms.index(i)
 
     
 
@@ -37,12 +48,12 @@ size  = (800, 500)
 screen = pygame.display.set_mode(size)
 #Posicion inicial
 pos_y = 395
-pos_x = 100
+pos_x = 400
 
 #inicializacion de variables
 cont    = False
 #Velocidad del personaje
-paso    = 1
+paso    = 1.5
 #Velocidad del salto
 paso_jump = 4
 #inicializacion de movimientos
@@ -70,9 +81,11 @@ jump_max = pos_y - jump_max_distance #Altura maxima relativa
 on_plataform = False
 aux_plataform = False
 #Existe un desfase entre la posicion ed la imagen y el lugar en el codigo
-plat_pos_x = (358, 505) #Posicion en eje x de la plataforma
-plat_pos_y = 340  #posision en eje Y de la plataforma
-
+#Lista de plataformas
+plataforms = [(192,335,340),(367,510,340)]
+#print(plataforms)
+plat_pos = plataforms[0] #Posicion en eje x & y de la plataforma
+#print(plat_pos)
 plataform = pygame.transform.scale(pygame.image.load('textures/plataforma.png'),(150,100)) #redimensionar el png de la plataforma
 
 ### cargar imagen del fondo
@@ -95,12 +108,13 @@ while True:
             up = True
         else :
             up = False
+        '''
         if keys[K_DOWN]:
             #Por ahora deshabilitado
             down = True
         else: 
             down = False
-        '''
+
         if keys[K_LEFT]:
             left = True
         else:
@@ -120,11 +134,10 @@ while True:
     # RENDER GAME GRID
     screen.blit(background,(0,0))
 
-    ## Dibujar Plataforma
-    screen.blit(plataform,(400,350))
+    ## Dibujar Plataformas
     
-    
-
+    for i in plataforms:
+        screen.blit(plataform,(i[0]+33,i[2]+10))
 
     ### Calculo de movimiento
     ''''
@@ -138,14 +151,15 @@ while True:
             walk = next(walk)
         cont = true_false(cont)
         #up = False
-    if down and pos_y < 450 and not jump and not is_jumping: 
-        pos_y += paso
-        image_dir = 'f'+str(walk)
-        if cont:
-            walk = next(walk)
-        cont = true_false(cont)
+    '''
+    if down  and not jump and not is_jumping: 
+        #pos_y += paso
+        image_dir = 'f0'
+        #if cont:
+        #    walk = next(walk)
+        #cont = true_false(cont)
         #down = False
-        '''
+        
    
    #Moviientos laterales
     if left and pos_x > 2:
@@ -218,16 +232,18 @@ while True:
             jump = False
         
     #Saber si el personaje esta en una plataforma
-    on_plataform = in_plataform(plat_pos_x,plat_pos_y,pos_x,pos_y)
+    on_plataform, plat_index = in_plataform(plataforms,pos_x,pos_y)
+    plat_pos = plataforms[plat_index]
     if on_plataform:
-        suma += 1        
+        suma += 1
+        #print(suma)        
         #   print('estoy aqui'+str(suma))
         if not aux_plataform and not going_up:
             #print('llegue')
-            jump_aux = plat_pos_y
+            jump_aux = plat_pos[2]
             is_jumping =False
             jump = False
-            pos_y = plat_pos_y
+            pos_y = plat_pos[2]
             aux_plataform = True
         #going_up = False
     elif not on_plataform:
