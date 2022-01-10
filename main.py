@@ -1,11 +1,13 @@
 import pygame, sys
 from pygame import key
+from personaje import Personaje
 
 from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b
 pygame.init()
 
 #Funciones utiles
 #Cambia alterna entre true y false
+''''
 def true_false(aux):
     if aux:
         return False
@@ -17,6 +19,7 @@ def next(pos):
         return pos + 1
     else:
         return 1
+'''
 #Saber si el personake se encuentra dentro de de los limites de una plataforma
 def in_plataform (plataforms,pos_x, pos_y):
     '''
@@ -50,17 +53,24 @@ screen = pygame.display.set_mode(size)
 pos_y = 395
 pos_x = 400
 
+##### PERSONAJE
+link = Personaje()
+
+'''''
+
 #inicializacion de variables
 cont    = False
 #Velocidad del personaje
-paso    = 1.5
+paso    = 3.5
 #Velocidad del salto
-paso_jump = 2.5
+paso_jump = 5.5
+'''
 #inicializacion de movimientos
 up      = False
 down    = False
 left    = False
 right   = False
+'''
 #Variable numero de imagen de caminata
 walk = 0
 
@@ -76,10 +86,11 @@ jump_max_distance = 70 #altura maxima del salto
 suma = 0 #variable de control para edicion
 image_dir = 'f1'#imagen inicial del personaje
 jump_max = pos_y - jump_max_distance #Altura maxima relativa
-
+'''
 ### Dibijo de la primera Plataforma
 on_plataform = False
 aux_plataform = False
+
 #Existe un desfase entre la posicion ed la imagen y el lugar en el codigo
 #Lista de plataformas
 plataforms = [(192,335,340),(367,510,340),(400,543,275),(327,470,210),(530,675,210)]
@@ -104,8 +115,7 @@ while True:
         
 #lectura de movimientos en eje Y deshabilitados
         if keys[K_UP] :
-            
-            jump = True
+            link.jump = True
         if keys[K_DOWN]:
             
             down = True
@@ -121,9 +131,9 @@ while True:
         else:
             right = False
         if keys[K_SPACE]:
-            speed = True
+            link.speed = True
         else:
-            speed = False
+            link.speed = False
 
     ## GRID
     # RENDER GAME GRID
@@ -136,21 +146,9 @@ while True:
 
 ### Calculo de movimiento
     
-    #Efecto de profundidad, eliminado momentaneamente 
-
-    ''''
-    if up and pos_y > limit_y and not jump and not is_jumping:
-        pos_y -= paso
-        image_dir = 'b'+str(walk)
-        if cont:
-            walk = next(walk)
-        cont = true_false(cont)
-        #up = False
-    '''
-    
-    if down  and not jump and not is_jumping: 
+    if down  and not link.jump and not link.is_jumping: 
         #pos_y += paso
-        image_dir = 'f0'
+        link.image_dir = 'f0'
         #if cont:
         #    walk = next(walk)
         #cont = true_false(cont)
@@ -158,12 +156,15 @@ while True:
         
    
 #Moviientos laterales
-    if left and pos_x > 2:
+    if left and link.pos_x > 2:
         #sprint del personaje
+        link.move_left()
+        ''''
         if speed:
             pos_x -= paso*2
         else:
             pos_x -= paso
+        
         #cargar siguiente sprite
         image_dir = 'l'+str(walk)
         #Frenar la secuencia de sprites para hacerla mas fluida
@@ -174,7 +175,10 @@ while True:
         if is_jumping:
             image_dir = 'l5'
         #left = False
-    if right and pos_x < 790:
+        '''
+    if right and pos_x < 770:
+        link.move_right()
+        '''
         #sprint del personaje
         if speed:
             pos_x += paso*2
@@ -190,21 +194,26 @@ while True:
         if is_jumping:
             image_dir = 'r2'
         #right = False
+        '''
     
-   ### SALTO
+### SALTO
     #si se oprime la tecla del salto y no esta saltando previamente
-    if jump and not is_jumping:
+    if link.jump and not link.is_jumping:
+        link.start_jump()
+        '''
         is_jumping = True
         jump_aux = pos_y
         going_up = True
         jump_max = pos_y - jump_max_distance
         jump = False
         aux_plataform = False
+        '''
         
     
     ### Funcionn del salto
-    if is_jumping :
-        
+    if link.is_jumping :
+        link.jumping()
+        '''        
         #condicion de subida
         if pos_y <= jump_aux and pos_y > jump_max and going_up:
             #print('subiendo')
@@ -227,15 +236,15 @@ while True:
             pos_y = jump_aux
             is_jumping = False
             jump = False
+        '''
             
-
-
-        
-  #Saber si el personaje esta en una plataforma
-    on_plataform, plat_index = in_plataform(plataforms,pos_x,pos_y)
+#Saber si el personaje esta en una plataforma
+    link.on_plataform, plat_index = in_plataform(plataforms,link.pos_x,link.pos_y)
     plat_pos = plataforms[plat_index]
-    if on_plataform:
-        suma += 1
+    if link.on_plataform:
+        link.set_on_plataform(plat_pos_y= plat_pos[2])
+        '''
+        #suma += 1
         #print(suma)        
         #   print('estoy aqui'+str(suma))
         if not aux_plataform and not going_up:
@@ -246,7 +255,10 @@ while True:
             pos_y = plat_pos[2]
             aux_plataform = True
         #going_up = False
-    elif not on_plataform:
+        '''
+    else:
+        link.out_of_plataform()
+        '''
         jump_aux = 395
         suma = 0
         if aux_plataform:
@@ -264,14 +276,14 @@ while True:
                 is_jumping = False
                 jump = False
                 aux_plataform = False   
-                
+        '''        
   ### ---- ZONA DE DIBUJO    
    
     #Cargar imagen del personaje
-    image = pygame.image.load(r'.\sprites\link\link_'+image_dir+'.png')
+    image = pygame.image.load(r'.\sprites\link\link_'+link.image_dir+'.png')
     
     #render imagen del personaje
-    screen.blit(image,(pos_x,pos_y))
+    screen.blit(image,(link.pos_x,link.pos_y))
     #pygame.draw.rect(screen, BLACK, (pos_x, pos_y, 80,80))
     
 
@@ -282,3 +294,4 @@ while True:
 
   #Actualizar Pantalla
     pygame.display.flip()
+
