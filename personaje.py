@@ -11,8 +11,8 @@ class Personaje():
         #Posicion inicial
         self.pos_y              = 395 #Posicion en eje Y
         self.pos_x              = 400 #Posicion en eje X
-        self.paso               = 3.5 #Velocidad del personaje
-        self.paso_jump          = 5.5 #Velocidad del salto
+        self.paso               = 1.5 #Velocidad del personaje
+        self.paso_jump          = 2.5 #Velocidad del salto
         self.speed              = False #sprint personaje  
         self.jump               = False #activar el salto
         self.is_jumping        = False #Saber si esta saltando
@@ -122,7 +122,6 @@ class Personaje():
         define las condiciones si el personaje llega a una plataforma
         '''
         if not self.aux_plataform and not self.going_up:
-            print('llegue')
             self.jump_aux = plat_pos_y
             self.is_jumping =False
             self.jump = False
