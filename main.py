@@ -1,11 +1,14 @@
+from distutils.errors import LinkError
 import pygame, sys
 from pygame import key
 from personaje import Personaje
+from villian import Wolf
 
-from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b
+from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b, K_n
 pygame.init()
 
 #Funciones utiles
+
 #Saber si el personake se encuentra dentro de de los limites de una plataforma
 def in_plataform (plataforms,pos_x, pos_y):
     '''
@@ -22,8 +25,6 @@ def in_plataform (plataforms,pos_x, pos_y):
         
     return False, plataforms.index(i)
 
-    
-
 #Definir Colores
 BLACK   = (   0,   0,   0)
 WHITE   = ( 255, 255, 255)
@@ -35,12 +36,17 @@ BLUE    = (   0,   0, 255)
 size  = (800, 500)
 
 screen = pygame.display.set_mode(size)
-#Posicion inicial
-#pos_y = 395
-#pos_x = 400
+
 
 ##### PERSONAJE
 link = Personaje()
+wolf = Wolf()
+
+#Posicion inicial
+link.pos_y = 395
+link.pos_x = 400
+link.take_sword = False
+hitted = False
 
 #inicializacion de movimientos
 up      = False
@@ -62,8 +68,8 @@ plataform = pygame.transform.scale(pygame.image.load('textures/plataforma.png'),
 
 ### cargar imagen del fondo
 background = pygame.image.load(r'textures\background.png')
-
-
+#sword =  pygame.transform.scale(pygame.image.load(r'sprites\sword.png'),(30,35))
+#sword =  pygame.image.load(r'sprites\sword.png')
 while True:
 
     ## Lectura de teclas del usuario
@@ -73,8 +79,7 @@ while True:
 
         keys = pygame.key.get_pressed()
        
-        
-#lectura de movimientos en eje Y deshabilitados
+    
         if keys[K_UP] :
             link.jump = True
         if keys[K_DOWN]:
@@ -92,9 +97,17 @@ while True:
         else:
             right = False
         if keys[K_SPACE]:
-            link.speed = True
-        else:
-            link.speed = False
+            link.hitting = True
+            #link.speed = True
+        #else:
+            #link.speed = False
+        if keys[K_b]:
+            link.take_sword = True
+    
+        if keys[K_n]:
+            link.take_sword = False
+            
+
 
     ## GRID
     # RENDER GAME GRID
@@ -103,7 +116,26 @@ while True:
     ## Dibujar Plataformas
     
     for i in plataforms:
-        screen.blit(plataform,(i[0]+33,i[2]+10))
+        screen.blit(plataform,(i[0]+42,i[2]+10))
+
+### Choque d epersonajes
+    if abs(link.pos_x - wolf.posx) < 30 and abs(link.pos_y - wolf.posy) < 10:
+        hitted = True
+    if hitted :
+        link.injured()
+        #link.visible = False
+        if link.counter == 100:
+            link.counter = 0
+            link. visible = True
+            hitted = False
+    else:
+        link.visible = True
+
+    
+### Golpe 
+    if link.hitting:
+        link.hit()
+
 
 ### Calculo de movimiento
     
@@ -120,39 +152,51 @@ while True:
     if left and link.pos_x > 2:
         #sprint del personaje
         link.move_left()
-
+        
     if right and link.pos_x < 770:
         link.move_right()
-
+            
 ### SALTO
     #si se oprime la tecla del salto y no esta saltando previamente
     if link.jump and not link.is_jumping:
-        link.start_jump()
+        link.start_jump()    
     
     ### Funcionn del salto
     if link.is_jumping :
         link.jumping()
-
-            
+                    
 #Saber si el personaje esta en una plataforma
     link.on_plataform, plat_index = in_plataform(plataforms,link.pos_x,link.pos_y)
     plat_pos = plataforms[plat_index]
     if link.on_plataform:
         link.set_on_plataform(plat_pos_y= plat_pos[2])
-
+        
     else:
         link.out_of_plataform()
+
+#Movimiento del lobo
+    wolf.move()
+    if wolf.posx < -60:
+        wolf.posx = 1000
+
         
-  ### ---- ZONA DE DIBUJO    
+### ---- ZONA DE DIBUJO    
    
     #Cargar imagen del personaje
     image = pygame.image.load(r'.\sprites\link\link_'+link.image_dir+'.png')
+    wolf_image = pygame.image.load('./sprites/wolf/'+wolf.image+'.png')
+
     
-    #render imagen del personaje
-    screen.blit(image,(link.pos_x,link.pos_y))
-    
+    #render imagen del personaje   
+    if link.visible:
+        screen.blit(image,(link.pos_x,link.pos_y))
+    #Render imagen lobo
+    screen.blit(wolf_image,(wolf.posx,wolf.posy))
+    #screen.blit(sword,(link.pos_x + 15,link.pos_y))
+    #pygame.draw.rect(screen, BLACK, (pos_x, pos_y, 80,80))
+
     ### ---- ZONA DE DIBUJO
 
-  #Actualizar Pantalla
+#Actualizar Pantalla
     pygame.display.flip()
 

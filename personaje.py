@@ -4,6 +4,9 @@
 
 
 
+from tokenize import Triple
+
+
 class Personaje():
 
 
@@ -24,15 +27,22 @@ class Personaje():
         self.walk               = 0  #Numero de la foto corriendo que sigue
         self.on_plataform       = False #Define si esta en una plataforma 
         self.aux_plataform      = False 
+        self.take_sword         = True
+        self.visible            = True
+        self.counter            = 0
+        self.direction          = True #Direcion de moviento True right, False left
+        self.counter_hit        = 0
+        self.hitting            = False
+        self.image_dir_h        = 'rh0'
 
-    def __next(self,pos):
+    def __next(self,pos,n):
         ''''
         Obtener el siguiente numero en la secuencia de imagenes
         '''
-        if pos < 6:
+        if pos < n:
             return pos + 1
         else:
-            return 1
+            return 0
 
     def __true_false(self,aux):
         ''''
@@ -45,39 +55,59 @@ class Personaje():
 
     def move_left(self):
         #sprint del personaje
+        self.direction = False
         if self.speed:
             self.pos_x -=self.paso*2
         else:
             self.pos_x -= self.paso
 
         #cargar siguiente sprite
-        self.image_dir = 'l'+str(self.walk)
+        if self.take_sword :
+            self.image_dir = 'ls'+str(self.walk)
+        else:
+            self.image_dir = 'l'+str(self.walk)
+        
         #Frenar la secuencia de sprites para hacerla mas fluida
         #si esta saltando carga el sprite de salto
+        
         if self.cont and not self.is_jumping:
-            self.walk = self.__next(self.walk)
+            self.walk = self.__next(self.walk,6)
         self.cont = self.__true_false(self.cont)
+        
         if self.is_jumping:
-            self.image_dir = 'l5'
-        #left = False
-        #return self.pos_x, self.image_dir
-
+            if self.take_sword:
+                self.image_dir = 'ls5'
+            else:
+                self.image_dir = 'l5'
+        if self.hitting:
+            self.image_dir = self.image_dir_h
+        
     def move_right(self):
+        self.direction = True
          #sprint del personaje
         if self.speed:
             self.pos_x += self.paso*2
         else:
             self.pos_x +=self. paso
         #cargar siguiente sprite
-        self.image_dir = 'r'+str(self.walk)
+        if self.take_sword :
+            self.image_dir = 'rs'+str(self.walk)
+        else:
+            self.image_dir = 'r'+str(self.walk)
+        
         #Frenar la secuencia de sprites para hacerla mas fluida
         #si esta saltando carga el sprite de salto
         if self.cont and not self.is_jumping:
-            self.walk = self.__next(self.walk)
+            self.walk = self.__next(self.walk,6)
+        
         self.cont = self.__true_false(self.cont)
         if self.is_jumping:
-            self.image_dir = 'r2'
-        #right = False
+            if self.take_sword:
+                self.image_dir = 'rs2'
+            else:
+                self.image_dir = 'r2'
+        if self.hitting:
+            self.image_dir = self.image_dir_h
 
     def start_jump(self):
         ''''
@@ -127,7 +157,6 @@ class Personaje():
             self.jump = False
             self.pos_y = plat_pos_y
             self.aux_plataform = True
-        #going_up = False
 
     def out_of_plataform(self):
         ''''
@@ -152,6 +181,31 @@ class Personaje():
                 self.jump = False
                 self.aux_plataform = False   
                 
+    def injured(self):
+        if self.counter % 5 == 0:
+            self.visible = self.__true_false(self.visible)
+        self.counter += 1
+        
+    
+    def hit(self):
+        if self.take_sword:
+            if self.counter_hit < 40:
+                if self.direction:
+                    aux = int(self.counter_hit/10)
+                    self.image_dir_h = 'rh'+str(aux)
+                    self.counter_hit += 4
+                else:
+                    aux = int(self.counter_hit/10)
+                    self.image_dir_h = 'lh'+str(aux)
+                    self.counter_hit += 4
+                self.image_dir = self.image_dir_h
+            else: 
+                #print('no mas golpe')
+                self.counter_hit = 0
+                self.hitting = False
+
+
+
 
 
 
