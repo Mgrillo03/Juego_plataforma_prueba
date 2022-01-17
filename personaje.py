@@ -12,10 +12,14 @@ class Personaje():
 
     def __init__(self):
         #Posicion inicial
+        self.reset()
+        
+    def reset(self):
+    #Condiciones iniciales
         self.pos_y              = 395 #Posicion en eje Y
         self.pos_x              = 400 #Posicion en eje X
-        self.paso               = 1.5 #Velocidad del personaje
-        self.paso_jump          = 2.5 #Velocidad del salto
+        self.paso               = 0.8 #Velocidad del personaje
+        self.paso_jump          = 1.5 #Velocidad del salto
         self.speed              = False #sprint personaje  
         self.jump               = False #activar el salto
         self.is_jumping        = False #Saber si esta saltando
@@ -27,13 +31,16 @@ class Personaje():
         self.walk               = 0  #Numero de la foto corriendo que sigue
         self.on_plataform       = False #Define si esta en una plataforma 
         self.aux_plataform      = False 
-        self.take_sword         = True
+        self.take_sword         = False
         self.visible            = True
         self.counter            = 0
         self.direction          = True #Direcion de moviento True right, False left
         self.counter_hit        = 0
         self.hitting            = False
         self.image_dir_h        = 'rh0'
+        self.hitted             = False
+        self.going_up           = True
+        self.dead               = False
 
     def __next(self,pos,n):
         ''''
@@ -146,6 +153,7 @@ class Personaje():
             self.pos_y = self.jump_aux
             self.is_jumping = False
             self.jump = False
+            self.going_up = True
 
     def set_on_plataform(self, plat_pos_y):
         ''''
@@ -180,32 +188,43 @@ class Personaje():
                 self.is_jumping = False
                 self.jump = False
                 self.aux_plataform = False   
+                self.going_up = True
                 
     def injured(self):
         if self.counter % 5 == 0:
             self.visible = self.__true_false(self.visible)
         self.counter += 1
         
-    
     def hit(self):
-        if self.take_sword:
-            if self.counter_hit < 40:
-                if self.direction:
-                    aux = int(self.counter_hit/10)
-                    self.image_dir_h = 'rh'+str(aux)
-                    self.counter_hit += 4
-                else:
-                    aux = int(self.counter_hit/10)
-                    self.image_dir_h = 'lh'+str(aux)
-                    self.counter_hit += 4
-                self.image_dir = self.image_dir_h
-            else: 
-                #print('no mas golpe')
-                self.counter_hit = 0
-                self.hitting = False
+  
+        if self.counter_hit < 40:
+            if self.direction:
+                self.image_dir_h = 'rh'+str(self.counter_hit // 10)
+                self.counter_hit += 5
+            else:
+                self.image_dir_h = 'lh'+str(self.counter_hit // 10)
+                self.counter_hit += 5
+            self.image_dir = self.image_dir_h
+        else: 
+            #print('no mas golpe')
+            self.counter_hit = 0
+            self.hitting = False
 
-
-
-
-
-
+    def defeated(self):
+        paso = 1.5
+        h  = 370    
+        self.image_dir = 'f0'
+        self.dead
+            
+        if self.pos_y > h and self.going_up:
+            self.pos_y -= paso
+        elif self.pos_y <= h and self.going_up:
+            self.going_up = False
+            self.pos_y += paso
+        elif self.pos_y > h and self.pos_y < 600 and not self.going_up:
+            self.pos_y += paso
+        elif self.pos_y > 600 and not self.going_up:
+            self.reset()
+            self.hitted = True
+            
+        

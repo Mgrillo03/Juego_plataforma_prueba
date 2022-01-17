@@ -1,10 +1,11 @@
 from distutils.errors import LinkError
+from tkinter.tix import Tree
 import pygame, sys
 from pygame import key
 from personaje import Personaje
 from villian import Wolf
 
-from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b, K_n
+from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b, K_n, K_v
 pygame.init()
 
 #Funciones utiles
@@ -25,6 +26,10 @@ def in_plataform (plataforms,pos_x, pos_y):
         
     return False, plataforms.index(i)
 
+def in_position (pos1,pos2):
+    if abs(pos1[0] - pos2[0]) < 20 and abs(pos1[1] - pos2[1]) < 10:
+        return True
+
 #Definir Colores
 BLACK   = (   0,   0,   0)
 WHITE   = ( 255, 255, 255)
@@ -43,10 +48,7 @@ link = Personaje()
 wolf = Wolf()
 
 #Posicion inicial
-link.pos_y = 395
-link.pos_x = 400
-link.take_sword = False
-hitted = False
+
 
 #inicializacion de movimientos
 up      = False
@@ -66,10 +68,16 @@ plat_pos = plataforms[0] #Posicion en eje x & y de la plataforma
 #print(plat_pos)
 plataform = pygame.transform.scale(pygame.image.load('textures/plataforma.png'),(150,100)) #redimensionar el png de la plataforma
 
+#Espada
+sword_pos = (600,210)
+sword_visible = True
+
 ### cargar imagen del fondo
 background = pygame.image.load(r'textures\background.png')
 #sword =  pygame.transform.scale(pygame.image.load(r'sprites\sword.png'),(30,35))
 #sword =  pygame.image.load(r'sprites\sword.png')
+
+aux = True
 while True:
 
     ## Lectura de teclas del usuario
@@ -77,8 +85,7 @@ while True:
         if event.type == pygame.QUIT:
             sys.exit()
 
-        keys = pygame.key.get_pressed()
-       
+        keys = pygame.key.get_pressed()       
     
         if keys[K_UP] :
             link.jump = True
@@ -90,23 +97,38 @@ while True:
 
         if keys[K_LEFT]:
             left = True
+            
         else:
             left = False
         if keys[K_RIGHT]:
             right = True
         else:
             right = False
-        if keys[K_SPACE]:
+        if keys[K_SPACE] and link.take_sword:
             link.hitting = True
-            #link.speed = True
-        #else:
-            #link.speed = False
-        if keys[K_b]:
+        
+        on_sword = in_position((link.pos_x,link.pos_y),sword_pos)
+        if keys[K_b] and on_sword:
             link.take_sword = True
-    
+            sword_visible = False
+            if link.direction :
+                link.image_dir = 'rs0'
+            else:
+                link.image_dir = 'ls0'
         if keys[K_n]:
             link.take_sword = False
+            sword_pos = (link.pos_x, link.pos_y)
+            sword_visible = True
+            if link.direction :
+                link.image_dir = 'r0'
+            else:
+                link.image_dir = 'l0'
+        
+        if keys[K_v]:
+            link.speed = True
             
+        else:
+            link.speed = False
 
 
     ## GRID
@@ -118,23 +140,8 @@ while True:
     for i in plataforms:
         screen.blit(plataform,(i[0]+42,i[2]+10))
 
-### Choque d epersonajes
-    if abs(link.pos_x - wolf.posx) < 30 and abs(link.pos_y - wolf.posy) < 10:
-        hitted = True
-    if hitted :
-        link.injured()
-        #link.visible = False
-        if link.counter == 100:
-            link.counter = 0
-            link. visible = True
-            hitted = False
-    else:
-        link.visible = True
-
     
-### Golpe 
-    if link.hitting:
-        link.hit()
+
 
 
 ### Calculo de movimiento
@@ -149,16 +156,16 @@ while True:
         
    
 #Moviientos laterales
-    if left and link.pos_x > 2:
+    if left and link.pos_x > 2 and not link.dead:
         #sprint del personaje
         link.move_left()
         
-    if right and link.pos_x < 770:
+    if right and link.pos_x < 770 and not link.dead:
         link.move_right()
             
 ### SALTO
     #si se oprime la tecla del salto y no esta saltando previamente
-    if link.jump and not link.is_jumping:
+    if link.jump and not link.is_jumping and not link.dead:
         link.start_jump()    
     
     ### Funcionn del salto
@@ -175,23 +182,68 @@ while True:
         link.out_of_plataform()
 
 #Movimiento del lobo
-    wolf.move()
+
+### Golpe 
+    if link.hitting and link.take_sword:
+        link.hit()
+        if in_position((link.pos_x,link.pos_y),(wolf.posx,wolf.posy)):
+            wolf.dead = True
+
+### Choque d epersonajes
+    if in_position((link.pos_x, link.pos_y),(wolf.posx,wolf.posy)):
+        if not wolf.dead and not link.hitted:
+            #link.hitted = True
+            link.dead = True
+
+    if link.dead :
+        link.defeated()
+
+    if link.hitted :
+        link.injured()
+        #link.visible = False
+        if link.counter == 100:
+            link.counter = 0
+            link. visible = True
+            link.hitted = False
+            sword_pos = (600,210)
+            sword_visible = True
+
+    else:
+        link.visible = True
+
+    
     if wolf.posx < -60:
         wolf.posx = 1000
+
+#Muerte Lobo
+    if wolf.dead:
+        if aux:
+            direction = link.direction
+            aux = False
+        wolf.defeated(direction)
+    else:
+        wolf.move()
+        aux = True
 
         
 ### ---- ZONA DE DIBUJO    
    
     #Cargar imagen del personaje
     image = pygame.image.load(r'.\sprites\link\link_'+link.image_dir+'.png')
+    #Cargar Lobo
     wolf_image = pygame.image.load('./sprites/wolf/'+wolf.image+'.png')
-
+    #Cargar Espada
+    sword_image = pygame.image.load('./sprites/sword.png')
     
     #render imagen del personaje   
     if link.visible:
         screen.blit(image,(link.pos_x,link.pos_y))
     #Render imagen lobo
     screen.blit(wolf_image,(wolf.posx,wolf.posy))
+    #Render Espada
+    if sword_visible:
+        screen.blit(sword_image,sword_pos)
+
     #screen.blit(sword,(link.pos_x + 15,link.pos_y))
     #pygame.draw.rect(screen, BLACK, (pos_x, pos_y, 80,80))
 
