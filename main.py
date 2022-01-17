@@ -97,11 +97,13 @@ while True:
 
         if keys[K_LEFT]:
             left = True
+            link.direction = False
             
         else:
             left = False
         if keys[K_RIGHT]:
             right = True
+            link.direction = True
         else:
             right = False
         if keys[K_SPACE] and link.take_sword:
@@ -158,10 +160,10 @@ while True:
 #Moviientos laterales
     if left and link.pos_x > 2 and not link.dead:
         #sprint del personaje
-        link.move_left()
+        link.move()
         
     if right and link.pos_x < 770 and not link.dead:
-        link.move_right()
+        link.move()
             
 ### SALTO
     #si se oprime la tecla del salto y no esta saltando previamente

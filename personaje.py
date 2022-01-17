@@ -19,7 +19,7 @@ class Personaje():
         self.pos_y              = 395 #Posicion en eje Y
         self.pos_x              = 400 #Posicion en eje X
         self.paso               = 0.8 #Velocidad del personaje
-        self.paso_jump          = 1.5 #Velocidad del salto
+        self.paso_jump          = 2 #Velocidad del salto
         self.speed              = False #sprint personaje  
         self.jump               = False #activar el salto
         self.is_jumping        = False #Saber si esta saltando
@@ -27,7 +27,7 @@ class Personaje():
         self.jump_max_distance  = 70 #altura maxima del salto
         self.image_dir          = 'f0'#imagen inicial del personaje
         self.jump_max           = self.pos_y - self.jump_max_distance #Altura maxima relativa
-        self.cont               = False #variable para frenado de fotogramas corriendo
+        self.cont               = 0 #variable para frenado de fotogramas corriendo
         self.walk               = 0  #Numero de la foto corriendo que sigue
         self.on_plataform       = False #Define si esta en una plataforma 
         self.aux_plataform      = False 
@@ -60,35 +60,49 @@ class Personaje():
         else:
             return True
 
-    def move_left(self):
+    def move(self):
         #sprint del personaje
-        self.direction = False
         if self.speed:
-            self.pos_x -=self.paso*2
+            paso = self.paso*2
         else:
-            self.pos_x -= self.paso
+            paso = self.paso
 
+        if self.direction :
+            image_aux = 'r'
+            jump = '6'
+            self.pos_x += paso
+        else:
+            image_aux = 'l'
+            jump = '5'
+            self.pos_x -= paso
+        
+        
         #cargar siguiente sprite
         if self.take_sword :
-            self.image_dir = 'ls'+str(self.walk)
+            self.image_dir = image_aux+'s'+str(self.walk)
         else:
-            self.image_dir = 'l'+str(self.walk)
+            self.image_dir = image_aux+str(self.walk)
         
         #Frenar la secuencia de sprites para hacerla mas fluida
         #si esta saltando carga el sprite de salto
         
-        if self.cont and not self.is_jumping:
+        if self.cont >= 8 and not self.is_jumping:
             self.walk = self.__next(self.walk,6)
-        self.cont = self.__true_false(self.cont)
+            self.cont = 0
+        else:
+            self.cont += 1
+        
+        #self.cont = self.__true_false(self.cont)
         
         if self.is_jumping:
             if self.take_sword:
-                self.image_dir = 'ls5'
+                self.image_dir = image_aux+'s'+jump
             else:
-                self.image_dir = 'l5'
+                self.image_dir = image_aux+jump
         if self.hitting:
             self.image_dir = self.image_dir_h
         
+    ''''
     def move_right(self):
         self.direction = True
          #sprint del personaje
@@ -115,6 +129,7 @@ class Personaje():
                 self.image_dir = 'r2'
         if self.hitting:
             self.image_dir = self.image_dir_h
+        '''
 
     def start_jump(self):
         ''''
