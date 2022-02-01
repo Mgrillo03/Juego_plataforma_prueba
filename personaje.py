@@ -11,57 +11,82 @@ class Personaje():
 
 
     def __init__(self):
-        #Posicion inicial
+        # Set initial position
         self.reset()
         
     def reset(self):
-    #Condiciones iniciales
-        self.pos_y              = 395 #Posicion en eje Y
-        self.pos_x              = 400 #Posicion en eje X
-        self.paso               = 0.8 #Velocidad del personaje
-        self.paso_jump          = 2 #Velocidad del salto
-        self.speed              = False #sprint personaje  
-        self.jump               = False #activar el salto
-        self.is_jumping        = False #Saber si esta saltando
-        self.jump_aux           = self.pos_y #lugar donde inicio el salto
-        self.jump_max_distance  = 70 #altura maxima del salto
-        self.image_dir          = 'f0'#imagen inicial del personaje
-        self.jump_max           = self.pos_y - self.jump_max_distance #Altura maxima relativa
-        self.cont               = 0 #variable para frenado de fotogramas corriendo
-        self.walk               = 0  #Numero de la foto corriendo que sigue
-        self.on_plataform       = False #Define si esta en una plataforma 
-        self.aux_plataform      = False 
-        self.take_sword         = False
-        self.visible            = True
-        self.counter            = 0
-        self.direction          = True #Direcion de moviento True right, False left
-        self.counter_hit        = 0
-        self.hitting            = False
-        self.image_dir_h        = 'rh0'
-        self.hitted             = False
-        self.going_up           = True
-        self.dead               = False
+        #  Initial Positions
+        self.pos_y              = 395 ## initial position in axis Y
+        self.pos_x              = 400 ## initial position in axis X
+        self.paso               = 0.8 ## character speed
+        self.paso_jump          = 2 ## jump speed
+        self.speed              = False ## sprint   
+        self.jump               = False ## activate jump
+        self.is_jumping        = False ## True when is jumping
+        self.jump_aux           = self.pos_y ## value of pos Y when started jumping
+        self.jump_max_distance  = 70 ## max jumping distance
+        self.image_dir          = 'f0'## directory of the character image
+        self.jump_max           = self.pos_y - self.jump_max_distance ## jump max pos Y
+        self.cont               = 0 ## stop of fps
+        self.walk               = 0  ## next character image
+        self.on_platform       = False ## true if character is on platform
+        self.aux_platform      = False ## aux when is on platform
+        self.take_sword         = False ## True if sword is taken
+        self.visible            = True ## True if character is visible
+        self.counter            = 0 ## Counter of the character twinkling
+        self.direction          = True ## movement direction True  = right, false = left
+        self.counter_hit        = 0 ## regulate the fps of the hit movement
+        self.hitting            = False ## true when character is hitting
+        self.image_dir_h        = 'rh0' ## first image when hitting
+        self.hitted             = False ## True when character get hitted
+        self.going_up           = True ## True when character is going up
+        self.dead               = False ## True when character is dead
 
     def __next(self,pos,n):
-        ''''
-        Obtener el siguiente numero en la secuencia de imagenes
-        '''
+        """
+            Next            
+            this funtion get the next number to load the movement image
+
+            Parameters:
+            - **pos: int**
+
+            Returns: 
+            - ** pos: int **
+        """
         if pos < n:
             return pos + 1
         else:
             return 0
 
     def __true_false(self,aux):
-        ''''
-        Alterna entre True y False para frenar el cambio de imagenes corriendo y hacerlo mas fluido
-        '''
+        """
+            True False           
+            this function alternates between True and False
+
+            Parameters:
+            - **pos: bool**
+
+            Returns the opposite of the variable pos        
+        
+        """
         if aux:
             return False
         else:
             return True
 
     def move(self):
-        #sprint del personaje
+        """
+            Move
+            this function moves this character one "pos"  in X to the left or right in the screen
+                it considers when the sword is taken, the character is jumping or its running
+
+            Parameters:
+            None    
+            Doesn't return any parameter, just modificate the parameter:
+                - self.image : str
+                - self.pos : float
+        """
+        # character sprint
         if self.speed:
             paso = self.paso*2
         else:
@@ -77,14 +102,14 @@ class Personaje():
             self.pos_x -= paso
         
         
-        #cargar siguiente sprite
+        # load nect sprite
         if self.take_sword :
             self.image_dir = image_aux+'s'+str(self.walk)
         else:
             self.image_dir = image_aux+str(self.walk)
         
-        #Frenar la secuencia de sprites para hacerla mas fluida
-        #si esta saltando carga el sprite de salto
+        # Slow down the sprotes load frecuency to make it more fluid
+        # if jumping it loads the jumping sprite
         
         if self.cont >= 8 and not self.is_jumping:
             self.walk = self.__next(self.walk,6)
@@ -102,67 +127,51 @@ class Personaje():
         if self.hitting:
             self.image_dir = self.image_dir_h
         
-    ''''
-    def move_right(self):
-        self.direction = True
-         #sprint del personaje
-        if self.speed:
-            self.pos_x += self.paso*2
-        else:
-            self.pos_x +=self. paso
-        #cargar siguiente sprite
-        if self.take_sword :
-            self.image_dir = 'rs'+str(self.walk)
-        else:
-            self.image_dir = 'r'+str(self.walk)
-        
-        #Frenar la secuencia de sprites para hacerla mas fluida
-        #si esta saltando carga el sprite de salto
-        if self.cont and not self.is_jumping:
-            self.walk = self.__next(self.walk,6)
-        
-        self.cont = self.__true_false(self.cont)
-        if self.is_jumping:
-            if self.take_sword:
-                self.image_dir = 'rs2'
-            else:
-                self.image_dir = 'r2'
-        if self.hitting:
-            self.image_dir = self.image_dir_h
-        '''
 
     def start_jump(self):
-        ''''
-        inicia secuencia de salto
-        '''
+        """
+            start jump
+            this function initiate the variables to start the jump
+
+            parameters: 
+                - None
+            doesn't return any value, it modificates the intern variables
+        
+        """
         self.is_jumping     = True 
-        self.jump_aux       = self.pos_y #Define la posicion inicial en el eje Y del salto
-        self.going_up       = True #Define si esta subiendo o bajando en el salto
-        self.jump_max       = self.pos_y - self.jump_max_distance #La distancia mas alta que puede saltar 
-        self.jump           = False #Evita que entre de vuelta en el ciclo
-        self.aux_plataform  = False #Indica si esta en una plataforma
+        self.jump_aux       = self.pos_y ## initial pos y when jumping
+        self.going_up       = True ## define if the character is going up or down
+        self.jump_max       = self.pos_y - self.jump_max_distance ## set the hieghst point of the jump 
+        self.jump           = False ## avoid to set initial values in the midddle of the jump
+        self.aux_platform  = False ##  True when player is on a platform 
 
     def jumping(self):
-        ''''
-        Controla el progreso del salto
-        '''
-        #condicion de subida
+        """
+            Jumping
+            this function controlates the secuence of a jump
+
+            parameters: 
+                - None
+            doesn't return any value, it modificates the intern variables
+                
+        """
+        # up condition
         if self.pos_y <= self.jump_aux and self.pos_y > self.jump_max and self.going_up:
             #print('subiendo')
             self.pos_y -= self.paso_jump
 
-        #condicion del punto mas alto
+        # heighest  condition
         elif self.pos_y <= self.jump_max and self.going_up:
             #print('arriba')
             self.going_up = False
             self.pos_y += self.paso_jump
 
-        #Condicion de bajada
-        elif self.pos_y < self.jump_aux and self.pos_y > self.jump_max and not self.going_up and not self.on_plataform:
+        # down condition
+        elif self.pos_y < self.jump_aux and self.pos_y > self.jump_max and not self.going_up and not self.on_platform:
             #print('bajando')
             self.pos_y += self.paso_jump
             
-        #Condicion de llegada a piso
+        # floor condition
         elif self.pos_y >= self.jump_aux and not self.going_up:
             #print('abajo')
             self.pos_y = self.jump_aux
@@ -170,48 +179,67 @@ class Personaje():
             self.jump = False
             self.going_up = True
 
-    def set_on_plataform(self, plat_pos_y):
-        ''''
-        define las condiciones si el personaje llega a una plataforma
-        '''
-        if not self.aux_plataform and not self.going_up:
+    def set_on_platform(self, plat_pos_y):
+        """
+            Set on platform
+            this funtion set the initial values when the character is on a platform
+
+            parameters: 
+                - **plat_pos_y: float** the pos in the axis Y of the platform that the character is on
+            doesn't return any value, it modificates the intern variables
+        """
+        if not self.aux_platform and not self.going_up:
             self.jump_aux = plat_pos_y
             self.is_jumping =False
             self.jump = False
             self.pos_y = plat_pos_y
-            self.aux_plataform = True
+            self.aux_platform = True
 
-    def out_of_plataform(self):
-        ''''
-        reset de condiciones cuando no esta en plataforma
-        define el salto de una platforma
-        '''
+    def out_of_platform(self):
+        """
+            Out of platform
+            this funtion determines when the character is out of a platform and control the fall from it
+
+            parameters: 
+                - None
+            doesn't return any value, it modificates the intern variables        
+        """
         self.jump_aux = 395
-        if self.aux_plataform:
+        if self.aux_platform:
             self.jump_aux = 395
             self.jump =False
             self.is_jumping = False
             self.going_up = False
-            if self.pos_y < self.jump_aux and self.pos_y > self.jump_max and not self.going_up and not self.on_plataform:
+            if self.pos_y < self.jump_aux and self.pos_y > self.jump_max and not self.going_up and not self.on_platform:
                 #Bajada 
                 self.pos_y += self.paso_jump
             
-        #Condicion de llegada a piso
+        # floor condition
             elif self.pos_y >= self.jump_aux and not self.going_up :
                 #Abajo
                 self.pos_y = self.jump_aux
                 self.is_jumping = False
                 self.jump = False
-                self.aux_plataform = False   
+                self.aux_platform = False   
                 self.going_up = True
                 
     def injured(self):
+        """
+            Injured
+            this funtion set the twinkling of the character when is hitted
+        """
         if self.counter % 5 == 0:
             self.visible = self.__true_false(self.visible)
         self.counter += 1
         
     def hit(self):
-  
+        """
+            hit
+            this funtion controls the movement of the character when hitting
+            parameters: 
+                - None
+            doesn't return any value, it modificates the intern variables
+        """  
         if self.counter_hit < 40:
             if self.direction:
                 self.image_dir_h = 'rh'+str(self.counter_hit // 10)
@@ -226,6 +254,14 @@ class Personaje():
             self.hitting = False
 
     def defeated(self):
+        """
+            Defeated
+            this funtion controls the animation when the character is defeated
+
+            parameters: 
+                - None
+            doesn't return any value, it modificates the intern variables
+        """
         paso = 1.5
         h  = 370    
         self.image_dir = 'f0'

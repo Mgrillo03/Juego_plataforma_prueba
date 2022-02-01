@@ -8,71 +8,81 @@ from villian import Wolf
 from pygame.constants import K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_UP, K_b, K_n, K_v
 pygame.init()
 
-#Funciones utiles
+# Useful Function
 
-#Saber si el personake se encuentra dentro de de los limites de una plataforma
-def in_plataform (plataforms,pos_x, pos_y):
+def in_platform (platforms,pos_x, pos_y):
     '''
-    Funcion Para determinar si el personaje esta sobre una plataforma
-    recibe una lista con las posiciones de cada plataforma en pantalla
-    recibe la posicion del personaje y regresa un Bool y una tupla con el resultado
-    plataformas : lista de tuplas con las coordenadas de cada plataforma
-    pos_x y pos_y es la posicion del personaje
+        In platform
+        this funtion sets if the character is on a platform
+
+        parameters: 
+            - **platforms: array** coordinates of every platform on the map
+            - **pos_x: float** pos in X axis of the character
+            - **pos_y: float** pos in Y axis of the character
+        returns: 
+            - **True** if the character is on a platform, **False** when its not 
+            - **platforms.index(i): int** idex of the platform the character is on
     '''
-    for i in plataforms:
+    for i in platforms:
  
         if pos_x > i[0] and pos_x < i[1] and pos_y <= i[2] and pos_y >= i[2] - 5:
-            return True, plataforms.index(i)
+            return True, platforms.index(i)
         
-    return False, plataforms.index(i)
+    return False, platforms.index(i)
 
 def in_position (pos1,pos2):
+    """
+        In position
+        this function evaluates the distance between two points of the maps, and determines if the are close enough to make contact
+
+        parameters:
+            - **pos1: float** 
+            - **pos2: float**
+        returns True when they are close, False when they aren't    
+    """
     if abs(pos1[0] - pos2[0]) < 20 and abs(pos1[1] - pos2[1]) < 10:
         return True
 
-#Definir Colores
+# Colors
 BLACK   = (   0,   0,   0)
 WHITE   = ( 255, 255, 255)
 GREEN   = (   0, 255,   0)
 RED     = ( 255,   0,   0)
 BLUE    = (   0,   0, 255)
 
-#Crear ventana
+# Windows size
 size  = (800, 500)
-
+# initiate window
 screen = pygame.display.set_mode(size)
 
 
-##### PERSONAJE
+# Characters init
 link = Personaje()
 wolf = Wolf()
 
-#Posicion inicial
 
-
-#inicializacion de movimientos
+# keyboard variables init
 up      = False
 down    = False
 left    = False
 right   = False
 
-### Dibijo de la primera Plataforma
-on_plataform = False
-aux_plataform = False
+# Platforms variables init
+on_platform = False
+aux_platform = False
 
-#Existe un desfase entre la posicion ed la imagen y el lugar en el codigo
-#Lista de plataformas
-plataforms = [(192,335,340),(367,510,340),(400,543,275),(327,470,210),(530,675,210)]
-#print(plataforms)
-plat_pos = plataforms[0] #Posicion en eje x & y de la plataforma
-#print(plat_pos)
-plataform = pygame.transform.scale(pygame.image.load('textures/plataforma.png'),(150,100)) #redimensionar el png de la plataforma
+# Platforms coodinates
+platforms = [(192,335,340),(367,510,340),(400,543,275),(327,470,210),(530,675,210)]
+# set platforms on screen
+plat_pos = platforms[0] 
+# platforms image load
+platform = pygame.transform.scale(pygame.image.load('textures/platforma.png'),(150,100)) #redimensionar el png de la platforma
 
-#Espada
+#Sowrd init
 sword_pos = (600,210)
 sword_visible = True
 
-### cargar imagen del fondo
+### Backgorund image load
 background = pygame.image.load(r'textures\background.png')
 #sword =  pygame.transform.scale(pygame.image.load(r'sprites\sword.png'),(30,35))
 #sword =  pygame.image.load(r'sprites\sword.png')
@@ -80,7 +90,7 @@ background = pygame.image.load(r'textures\background.png')
 aux = True
 while True:
 
-    ## Lectura de teclas del usuario
+    ## Keyboard events read
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -137,16 +147,15 @@ while True:
     # RENDER GAME GRID
     screen.blit(background,(0,0))
 
-    ## Dibujar Plataformas
-    
-    for i in plataforms:
-        screen.blit(plataform,(i[0]+42,i[2]+10))
+    ## Render platforms    
+    for i in platforms:
+        screen.blit(platform,(i[0]+42,i[2]+10))
 
     
 
 
 
-### Calculo de movimiento
+## Movement 
     
     if down  and not link.jump and not link.is_jumping: 
         #pos_y += paso
@@ -157,7 +166,7 @@ while True:
         #down = False
         
    
-#Moviientos laterales
+# side movements
     if left and link.pos_x > 2 and not link.dead:
         #sprint del personaje
         link.move()
@@ -165,33 +174,31 @@ while True:
     if right and link.pos_x < 770 and not link.dead:
         link.move()
             
-### SALTO
-    #si se oprime la tecla del salto y no esta saltando previamente
+# Jump
+    # jump init
     if link.jump and not link.is_jumping and not link.dead:
         link.start_jump()    
     
-    ### Funcionn del salto
+    # continue jumping
     if link.is_jumping :
         link.jumping()
                     
-#Saber si el personaje esta en una plataforma
-    link.on_plataform, plat_index = in_plataform(plataforms,link.pos_x,link.pos_y)
-    plat_pos = plataforms[plat_index]
-    if link.on_plataform:
-        link.set_on_plataform(plat_pos_y= plat_pos[2])
+#S determine if the caracter is on a platform
+    link.on_platform, plat_index = in_platform(platforms,link.pos_x,link.pos_y)
+    plat_pos = platforms[plat_index]
+    if link.on_platform:
+        link.set_on_platform(plat_pos_y= plat_pos[2])
         
     else:
-        link.out_of_plataform()
-
-#Movimiento del lobo
-
-### Golpe 
+        link.out_of_platform()
+        
+    # Link hitting  
     if link.hitting and link.take_sword:
         link.hit()
         if in_position((link.pos_x,link.pos_y),(wolf.posx,wolf.posy)):
             wolf.dead = True
 
-### Choque d epersonajes
+# characters crash
     if in_position((link.pos_x, link.pos_y),(wolf.posx,wolf.posy)):
         if not wolf.dead and not link.hitted:
             #link.hitted = True
@@ -214,10 +221,12 @@ while True:
         link.visible = True
 
     
+
+# Wolf movement
     if wolf.posx < -60:
         wolf.posx = 1000
 
-#Muerte Lobo
+# wolf dead
     if wolf.dead:
         if aux:
             direction = link.direction
@@ -228,29 +237,29 @@ while True:
         aux = True
 
         
-### ---- ZONA DE DIBUJO    
+### ---- Render zone  
    
-    #Cargar imagen del personaje
+    # character image load
     image = pygame.image.load(r'.\sprites\link\link_'+link.image_dir+'.png')
-    #Cargar Lobo
+    # wolf image load
     wolf_image = pygame.image.load('./sprites/wolf/'+wolf.image+'.png')
-    #Cargar Espada
+    # sword image load
     sword_image = pygame.image.load('./sprites/sword.png')
     
-    #render imagen del personaje   
+    #character render
     if link.visible:
         screen.blit(image,(link.pos_x,link.pos_y))
-    #Render imagen lobo
+    # wolf render
     screen.blit(wolf_image,(wolf.posx,wolf.posy))
-    #Render Espada
+    # sword rnder
     if sword_visible:
         screen.blit(sword_image,sword_pos)
 
     #screen.blit(sword,(link.pos_x + 15,link.pos_y))
     #pygame.draw.rect(screen, BLACK, (pos_x, pos_y, 80,80))
 
-    ### ---- ZONA DE DIBUJO
+    ### ---- Render zone
 
-#Actualizar Pantalla
+# Update screen
     pygame.display.flip()
 
